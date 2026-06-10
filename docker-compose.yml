@@ -8,3 +8,11 @@ services:
     build: ./app/v2
     ports:
       - "5002:5000"
+
+  smartdeploy-dashboard:
+    build: ./dashboard
+    ports:
+      - "3000:3000"
+    depends_on:
+      - smartdeploy-v1
+      - smartdeploy-v2

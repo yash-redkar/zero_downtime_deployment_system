@@ -19,3 +19,6 @@ jobs:
 
       - name: Build v2 Docker image
         run: docker build -t smartdeploy-v2 ./app/v2
+
+      - name: Build dashboard Docker image
+        run: docker build -t smartdeploy-dashboard ./dashboard
