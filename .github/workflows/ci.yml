@@ -1,36 +1,42 @@
-name: SmartDeploy CI
+name: SmartDeploy Application
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - 'v*'
 
 jobs:
-  docker-build-test:
+  manufacture-artifact:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Fetch Source Code Repository
         uses: actions/checkout@v4
 
-      - name: Build v1 Docker image
-        run: docker build -t smartdeploy-v1 ./app/v1
-
-      - name: Build v2 Docker image
-        run: docker build -t smartdeploy-v2 ./app/v2
-
-      - name: Create build report
+      - name: Extract Tag and Short Git Commit SHA
+        id: meta
         run: |
-          mkdir reports
-          echo "SmartDeploy CI Build Report" > reports/build-report.txt
-          echo "v1 Docker image build: SUCCESS" >> reports/build-report.txt
-          echo "v2 Docker image build: SUCCESS" >> reports/build-report.txt
-          echo "Dashboard prototype available in dashboard folder" >> reports/build-report.txt
-          echo "Initial phase completed: Docker + GitHub Actions CI" >> reports/build-report.txt
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "clean_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: Upload CI build report artifact
+      - name: Initialize Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Execute Makefile Package Routine
+        run: |
+          VERSION_STRING="${{ steps.meta.outputs.clean_tag }}-${{ steps.meta.outputs.sha_short }}"
+          make package VERSION=$VERSION_STRING
+
+      - name: Upload v1 Container Tarball Archive
         uses: actions/upload-artifact@v4
         with:
-          name: smartdeploy-build-report
-          path: reports/build-report.txt
+          name: smartdeploy-v1-package-${{ steps.meta.outputs.clean_tag }}
+          path: smartdeploy-v1-${{ steps.meta.outputs.clean_tag }}-*.tar
+          retention-days: 7
+
+      - name: Upload v2 Container Tarball Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartdeploy-v2-package-${{ steps.meta.outputs.clean_tag }}
+          path: smartdeploy-v2-${{ steps.meta.outputs.clean_tag }}-*.tar
+          retention-days: 7
