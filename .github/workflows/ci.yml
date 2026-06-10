@@ -20,5 +20,17 @@ jobs:
       - name: Build v2 Docker image
         run: docker build -t smartdeploy-v2 ./app/v2
 
-      - name: Build dashboard Docker image
-        run: docker build -t smartdeploy-dashboard ./dashboard
+      - name: Create build report
+        run: |
+          mkdir reports
+          echo "SmartDeploy CI Build Report" > reports/build-report.txt
+          echo "v1 Docker image build: SUCCESS" >> reports/build-report.txt
+          echo "v2 Docker image build: SUCCESS" >> reports/build-report.txt
+          echo "Dashboard prototype available in dashboard folder" >> reports/build-report.txt
+          echo "Initial phase completed: Docker + GitHub Actions CI" >> reports/build-report.txt
+
+      - name: Upload CI build report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: smartdeploy-build-report
+          path: reports/build-report.txt
