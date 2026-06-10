@@ -1,0 +1,10 @@
+services:
+  smartdeploy-v1:
+    build: ./app/v1
+    ports:
+      - "5001:5000"
+
+  smartdeploy-v2:
+    build: ./app/v2
+    ports:
+      - "5002:5000"

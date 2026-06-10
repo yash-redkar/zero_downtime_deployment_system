@@ -1,0 +1,21 @@
+name: SmartDeploy CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  docker-build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build v1 Docker image
+        run: docker build -t smartdeploy-v1 ./app/v1
+
+      - name: Build v2 Docker image
+        run: docker build -t smartdeploy-v2 ./app/v2
